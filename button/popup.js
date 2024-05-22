@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Request the stored question data from the background script
+    chrome.runtime.sendMessage({ action: 'getQuestion' }, function (response) {
+        if (response.success) {
+            document.getElementById('questionText').innerText = response.question;
+        }
+    });
+
     const data = {
         labels: ['Completed', 'Remaining'],
         datasets: [{

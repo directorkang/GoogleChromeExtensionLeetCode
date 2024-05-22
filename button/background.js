@@ -22,4 +22,10 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         // Return true to indicate you want to send a response asynchronously
         return true;
     }
+
+    if (message.action === 'storeQuestion') {
+        questionData = message.question;
+        console.log('Question stored:', questionData);
+        sendResponse({ success: true });
+    }
 });

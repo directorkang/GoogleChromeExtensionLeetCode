@@ -39,4 +39,12 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    // Extract the question text from the webpage
+    let questionText = document.querySelector('.question-title').innerText;
+
+    // Send the extracted data to the background script
+    chrome.runtime.sendMessage({ action: 'storeQuestion', question: questionText }, function (response) {
+        console.log('Question data sent to background:', response);
+    });
 });
