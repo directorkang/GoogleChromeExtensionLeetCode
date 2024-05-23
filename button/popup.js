@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const data = {
             labels: ['Completed', 'Remaining'],
             datasets: [{
-                data: [75, 25], // Example: 75% completed, 25% remaining
+                data: [0, 100], 
                 backgroundColor: [
                     'green', // Completed
                     'lightgray' // Remaining
@@ -37,9 +37,12 @@ document.addEventListener('DOMContentLoaded', function () {
         radioButtons.forEach(button => {
             button.addEventListener('change', function () {
                 console.log('Radio button changed:', this.value);
-                if (this.value === 'Job 1') {
+                if (this.value === 'Job 1')
+                {
                     pieChart.data.datasets[0].data = [60, 40];
-                } else if (this.value === 'Job 2') {
+                }
+                else if (this.value === 'Job 2')
+                {
                     pieChart.data.datasets[0].data = [80, 20];
                 }
                 pieChart.update();
