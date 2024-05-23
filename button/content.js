@@ -1,4 +1,21 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Select all anchor elements that match the pattern
+    const questionLinks = document.querySelectorAll('a[href*="/problems/"]');
+
+    // Array to store the extracted question topics
+    let questionTopics = [];
+
+    // Iterate over each link and extract the text
+    questionLinks.forEach(link => {
+        const questionText = link.textContent.trim();
+        questionTopics.push(questionText);
+    });
+
+    // Store the question topics in chrome storage
+    chrome.storage.local.set({ 'questionTopics': questionTopics }, function () {
+        console.log('Question topics saved:', questionTopics);
+    });
+
     const createChart = (data) => {
         const ctx = document.getElementById('pieChart').getContext('2d');
         return new Chart(ctx, {

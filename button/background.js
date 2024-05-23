@@ -1,3 +1,5 @@
+let questionData = ''; // Global variable to store question data
+
 // Listen for the install event
 chrome.runtime.onInstalled.addListener(() => {
     console.log('Extension installed');
@@ -19,7 +21,6 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
             console.error('Error fetching data:', error);
             sendResponse({ success: false, error: error });
         }
-        // Return true to indicate you want to send a response asynchronously
         return true;
     }
 
@@ -27,5 +28,9 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         questionData = message.question;
         console.log('Question stored:', questionData);
         sendResponse({ success: true });
+    }
+
+    if (message.action === 'getQuestion') {
+        sendResponse({ success: true, question: questionData });
     }
 });

@@ -3,7 +3,8 @@
   "name": "LeetCode Job Matching Button Extension",
   "version": "1.0",
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "storage"
   ],
   "host_permissions": [
     "https://leetcode.com/*"
