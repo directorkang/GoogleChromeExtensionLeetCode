@@ -1,21 +1,25 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Select all anchor elements that match the pattern
-    const questionLinks = document.querySelectorAll('a[href*="/problems/"]');
+    // Function to extract completed questions from the webpage
+    const extractCompletedQuestions = () => {
+        // Select all anchor elements that match the pattern
+        const questionLinks = document.querySelectorAll('a[href*="/problems/"]');
 
-    // Array to store the extracted question topics
-    let questionTopics = [];
+        // Array to store the extracted question topics
+        let questionTopics = [];
 
-    // Iterate over each link and extract the text
-    questionLinks.forEach(link => {
-        const questionText = link.textContent.trim();
-        questionTopics.push(questionText);
-    });
+        // Iterate over each link and extract the text
+        questionLinks.forEach(link => {
+            const questionText = link.textContent.trim();
+            questionTopics.push(questionText);
+        });
 
-    // Store the question topics in chrome storage
-    chrome.storage.local.set({ 'questionTopics': questionTopics }, function () {
-        console.log('Question topics saved:', questionTopics);
-    });
+        // Store the question topics in chrome storage
+        chrome.storage.local.set({ 'userCompletedQuestions': questionTopics }, function () {
+            console.log('Completed questions saved:', questionTopics);
+        });
+    };
 
+    // Function to initialize the pie chart
     const createChart = (data) => {
         const ctx = document.getElementById('pieChart').getContext('2d');
         return new Chart(ctx, {
@@ -34,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const data = {
         labels: ['Completed', 'Remaining'],
         datasets: [{
-            data: [75, 25], // Example: 75% completed, 25% remaining
+            data: [0, 100], // Initial data
             backgroundColor: [
                 'green', // Completed
                 'lightgray' // Remaining
@@ -49,19 +53,34 @@ document.addEventListener('DOMContentLoaded', function () {
     const radioButtons = document.querySelectorAll('input[type="radio"]');
     radioButtons.forEach(button => {
         button.addEventListener('change', function () {
-            if (this.value === 'Job 1') {
-                updateChartData(pieChart, [60, 40]);
-            } else if (this.value === 'Job 2') {
-                updateChartData(pieChart, [80, 20]);
-            }
+            chrome.storage.local.get(['userCompletedQuestions', 'job1Questions', 'job2Questions'], function (result) {
+                const userCompletedQuestions = result.userCompletedQuestions || [];
+                let requiredQuestions = [];
+
+                if (this.value === 'Job 1') {
+                    requiredQuestions = result.job1Questions || [];
+                } else if (this.value === 'Job 2') {
+                    requiredQuestions = result.job2Questions || [];
+                }
+
+                const matchedQuestions = requiredQuestions.filter(question => userCompletedQuestions.includes(question));
+                const completedPercentage = Math.round((matchedQuestions.length / requiredQuestions.length) * 100);
+                const remainingPercentage = 100 - completedPercentage;
+
+                updateChartData(pieChart, [completedPercentage, remainingPercentage]);
+                console.log('Pie chart updated:', pieChart.data.datasets[0].data);
+            });
         });
     });
 
-    // Extract the question text from the webpage
-    let questionText = document.querySelector('.question-title').innerText;
+    // Extract and store completed questions when the content script is loaded
+    extractCompletedQuestions();
 
-    // Send the extracted data to the background script
-    chrome.runtime.sendMessage({ action: 'storeQuestion', question: questionText }, function (response) {
-        console.log('Question data sent to background:', response);
-    });
+    // Example of extracting a specific question title if needed
+    let questionText = document.querySelector('.question-title')?.innerText;
+    if (questionText) {
+        chrome.runtime.sendMessage({ action: 'storeQuestion', question: questionText }, function (response) {
+            console.log('Question data sent to background:', response);
+        });
+    }
 });

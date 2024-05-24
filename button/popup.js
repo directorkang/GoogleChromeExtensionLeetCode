@@ -1,18 +1,55 @@
 document.addEventListener('DOMContentLoaded', function () {
+    let userCompletedQuestions = [];
+    let job1Questions = [];
+    let job2Questions = [];
+
+    // Retrieve completed questions from Chrome storage
+    chrome.storage.local.get('userCompletedQuestions', function (result) {
+        userCompletedQuestions = result.userCompletedQuestions || [];
+        console.log('Retrieved completed questions:', userCompletedQuestions);
+    });
+
+    // Retrieve saved job questions from Chrome storage
+    chrome.storage.local.get(['job1Questions', 'job2Questions'], function (result) {
+        job1Questions = result.job1Questions || [];
+        job2Questions = result.job2Questions || [];
+        document.getElementById('job1Input').value = job1Questions.join('\n');
+        document.getElementById('job2Input').value = job2Questions.join('\n');
+    });
+
+    // Save Job 1 questions
+    document.getElementById('saveJob1').addEventListener('click', function () {
+        job1Questions = document.getElementById('job1Input').value.split('\n').map(question => question.trim());
+        chrome.storage.local.set({ 'job1Questions': job1Questions }, function () {
+            console.log('Job 1 questions saved:', job1Questions);
+        });
+    });
+
+    // Save Job 2 questions
+    document.getElementById('saveJob2').addEventListener('click', function () {
+        job2Questions = document.getElementById('job2Input').value.split('\n').map(question => question.trim());
+        chrome.storage.local.set({ 'job2Questions': job2Questions }, function () {
+            console.log('Job 2 questions saved:', job2Questions);
+        });
+    });
+
+    // Function to calculate the matching percentage
+    const calculateMatchingPercentage = (completedQuestions, requiredQuestions) => {
+        const matchedQuestions = requiredQuestions.filter(question => completedQuestions.includes(question));
+        return Math.round((matchedQuestions.length / requiredQuestions.length) * 100);
+    };
+
     // Function to initialize the pie chart
     const initializePieChart = () => {
-        // Check if Chart object is defined
         if (typeof Chart === 'undefined') {
-            // Chart.js library is not loaded yet, wait and retry
             setTimeout(initializePieChart, 100);
             return;
         }
 
-        // Sample data for the pie chart (replace with your actual data)
         const data = {
             labels: ['Completed', 'Remaining'],
             datasets: [{
-                data: [0, 100], 
+                data: [0, 100],
                 backgroundColor: [
                     'green', // Completed
                     'lightgray' // Remaining
@@ -20,40 +57,35 @@ document.addEventListener('DOMContentLoaded', function () {
             }]
         };
 
-        // Get the canvas element
         const ctx = document.getElementById('pieChart').getContext('2d');
-        console.log('Canvas context:', ctx);
 
-        // Create the pie chart
         const pieChart = new Chart(ctx, {
             type: 'pie',
             data: data,
             options: {}
         });
-        console.log('Pie chart created:', pieChart);
 
-        // Add event listener to radio buttons
         const radioButtons = document.querySelectorAll('input[type="radio"]');
         radioButtons.forEach(button => {
             button.addEventListener('change', function () {
-                console.log('Radio button changed:', this.value);
-                if (this.value === 'Job 1')
-                {
-                    pieChart.data.datasets[0].data = [60, 40];
+                let requiredQuestions = [];
+
+                if (this.value === 'Job 1') {
+                    requiredQuestions = job1Questions;
+                } else if (this.value === 'Job 2') {
+                    requiredQuestions = job2Questions;
                 }
-                else if (this.value === 'Job 2')
-                {
-                    pieChart.data.datasets[0].data = [80, 20];
-                }
+
+                const completedPercentage = calculateMatchingPercentage(userCompletedQuestions, requiredQuestions);
+                const remainingPercentage = 100 - completedPercentage;
+
+                pieChart.data.datasets[0].data = [completedPercentage, remainingPercentage];
                 pieChart.update();
-                console.log('Pie chart updated:', pieChart.data.datasets[0].data);
             });
         });
     };
 
-    // Call initializePieChart function immediately
     initializePieChart();
 
-    // Set the default text for the job matching percentage
     document.getElementById('questionText').innerText = 'Job Matching Percentage';
 });
