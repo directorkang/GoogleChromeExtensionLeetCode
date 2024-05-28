@@ -6,7 +6,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Retrieve completed questions from Chrome storage
     chrome.storage.local.get('userCompletedQuestions', function (result) {
         userCompletedQuestions = result.userCompletedQuestions || [];
-        console.log('Retrieved completed questions:', userCompletedQuestions);
+
+        // Initialize the pie chart after retrieving data from storage
+        initializePieChart();
     });
 
     // Retrieve saved job questions from Chrome storage
@@ -15,6 +17,9 @@ document.addEventListener('DOMContentLoaded', function () {
         job2Questions = result.job2Questions || [];
         document.getElementById('job1Input').value = job1Questions.join('\n');
         document.getElementById('job2Input').value = job2Questions.join('\n');
+
+        console.log('Retrieved Job 1 questions:', job1Questions);
+        console.log('Retrieved Job 2 questions:', job2Questions);
     });
 
     // Save Job 1 questions
@@ -65,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
             options: {}
         });
 
+        // Add event listener to radio buttons
         const radioButtons = document.querySelectorAll('input[type="radio"]');
         radioButtons.forEach(button => {
             button.addEventListener('change', function () {
@@ -76,16 +82,29 @@ document.addEventListener('DOMContentLoaded', function () {
                     requiredQuestions = job2Questions;
                 }
 
+                console.log('Required questions for', this.value, ':', requiredQuestions);
+
+                // Update userCompletedQuestions based on the selected job's questions
+                userCompletedQuestions = requiredQuestions.slice();
+
+                // Hardcode userCompletedQuestions to be the same as job1Questions
+                userCompletedQuestions = job1Questions;
+
+                console.log('User completed questions:', userCompletedQuestions);
+
                 const completedPercentage = calculateMatchingPercentage(userCompletedQuestions, requiredQuestions);
                 const remainingPercentage = 100 - completedPercentage;
 
                 pieChart.data.datasets[0].data = [completedPercentage, remainingPercentage];
                 pieChart.update();
+
+                console.log('Updated pie chart data:', pieChart.data.datasets[0].data);
             });
         });
     };
 
-    initializePieChart();
+    // No need to call initializePieChart() here; it will be called after retrieving completed questions from storage
+    // initializePieChart();
 
     document.getElementById('questionText').innerText = 'Job Matching Percentage';
 });
