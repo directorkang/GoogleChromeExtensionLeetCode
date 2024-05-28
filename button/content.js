@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
     radioButtons.forEach(button => {
         button.addEventListener('change', function () {
             chrome.storage.local.get(['userCompletedQuestions', 'job1Questions', 'job2Questions'], function (result) {
+
                 const userCompletedQuestions = result.userCompletedQuestions || [];
                 let requiredQuestions = [];
 

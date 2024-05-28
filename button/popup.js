@@ -84,11 +84,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 console.log('Required questions for', this.value, ':', requiredQuestions);
 
-                // Update userCompletedQuestions based on the selected job's questions
-                userCompletedQuestions = requiredQuestions.slice();
+                // Select all anchor elements that match the pattern
+                const questionLinks = document.querySelectorAll('a[href*="/problems/"]');
 
-                // Hardcode userCompletedQuestions to be the same as job1Questions
-                userCompletedQuestions = job1Questions;
+                // Array to store the extracted question topics
+                userCompletedQuestions = [];
+
+                // Iterate over each link and extract the text
+                questionLinks.forEach(link => {
+                    const questionText = link.textContent.trim();
+                    userCompletedQuestions.push(questionText);
+                });
 
                 console.log('User completed questions:', userCompletedQuestions);
 
@@ -105,6 +111,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // No need to call initializePieChart() here; it will be called after retrieving completed questions from storage
     // initializePieChart();
-
+    console.log('User completed questions:', userCompletedQuestions);
     document.getElementById('questionText').innerText = 'Job Matching Percentage';
 });
