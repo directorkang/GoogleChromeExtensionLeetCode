@@ -3,47 +3,6 @@ document.addEventListener('DOMContentLoaded', function () {
     let job1Questions = [];
     let job2Questions = [];
 
-    // Retrieve completed questions from Chrome storage
-    chrome.storage.local.get('userCompletedQuestions', function (result) {
-        userCompletedQuestions = result.userCompletedQuestions || [];
-
-        // Initialize the pie chart after retrieving data from storage
-        initializePieChart();
-    });
-
-    // Retrieve saved job questions from Chrome storage
-    chrome.storage.local.get(['job1Questions', 'job2Questions'], function (result) {
-        job1Questions = result.job1Questions || [];
-        job2Questions = result.job2Questions || [];
-        document.getElementById('job1Input').value = job1Questions.join('\n');
-        document.getElementById('job2Input').value = job2Questions.join('\n');
-
-        console.log('Retrieved Job 1 questions:', job1Questions);
-        console.log('Retrieved Job 2 questions:', job2Questions);
-    });
-
-    // Save Job 1 questions
-    document.getElementById('saveJob1').addEventListener('click', function () {
-        job1Questions = document.getElementById('job1Input').value.split('\n').map(question => question.trim());
-        chrome.storage.local.set({ 'job1Questions': job1Questions }, function () {
-            console.log('Job 1 questions saved:', job1Questions);
-        });
-    });
-
-    // Save Job 2 questions
-    document.getElementById('saveJob2').addEventListener('click', function () {
-        job2Questions = document.getElementById('job2Input').value.split('\n').map(question => question.trim());
-        chrome.storage.local.set({ 'job2Questions': job2Questions }, function () {
-            console.log('Job 2 questions saved:', job2Questions);
-        });
-    });
-
-    // Function to calculate the matching percentage
-    const calculateMatchingPercentage = (completedQuestions, requiredQuestions) => {
-        const matchedQuestions = requiredQuestions.filter(question => completedQuestions.includes(question));
-        return Math.round((matchedQuestions.length / requiredQuestions.length) * 100);
-    };
-
     // Function to initialize the pie chart
     const initializePieChart = () => {
         if (typeof Chart === 'undefined') {
@@ -84,20 +43,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 console.log('Required questions for', this.value, ':', requiredQuestions);
 
-                // Select all anchor elements that match the pattern
-                const questionLinks = document.querySelectorAll('a[href*="/problems/"]');
-
-                // Array to store the extracted question topics
-                userCompletedQuestions = [];
-
-                // Iterate over each link and extract the text
-                questionLinks.forEach(link => {
-                    const questionText = link.textContent.trim();
-                    userCompletedQuestions.push(questionText);
-                });
-
-                console.log('User completed questions:', userCompletedQuestions);
-
                 const completedPercentage = calculateMatchingPercentage(userCompletedQuestions, requiredQuestions);
                 const remainingPercentage = 100 - completedPercentage;
 
@@ -109,8 +54,78 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
-    // No need to call initializePieChart() here; it will be called after retrieving completed questions from storage
-    // initializePieChart();
+    // Function to calculate the matching percentage
+    const calculateMatchingPercentage = (completedQuestions, requiredQuestions) => {
+        const matchedQuestions = requiredQuestions.filter(question => completedQuestions.includes(question));
+        return Math.round((matchedQuestions.length / requiredQuestions.length) * 100);
+    };
+
+    // Function to add a question to the userCompletedQuestions array
+    const addQuestion = (question) => {
+        // Check if the question is not already in the array
+        if (!userCompletedQuestions.includes(question)) {
+            userCompletedQuestions.push(question);
+            // Store the updated array in Chrome storage
+            chrome.storage.local.set({ 'userCompletedQuestions': userCompletedQuestions }, function () {
+                console.log('Question added:', question);
+            });
+        } else {
+            console.log('Question already exists:', question);
+        }
+    };
+
+    // Retrieve completed questions from Chrome storage
+    chrome.storage.local.get('userCompletedQuestions', function (result) {
+        userCompletedQuestions = result.userCompletedQuestions || [];
+
+        // Initialize the pie chart after retrieving data from storage
+        initializePieChart();
+    });
+
+    // Retrieve saved job questions from Chrome storage
+    chrome.storage.local.get(['job1Questions', 'job2Questions'], function (result) {
+        job1Questions = result.job1Questions || [];
+        job2Questions = result.job2Questions || [];
+        document.getElementById('job1Input').value = job1Questions.join('\n');
+        document.getElementById('job2Input').value = job2Questions.join('\n');
+
+        console.log('Retrieved Job 1 questions:', job1Questions);
+        console.log('Retrieved Job 2 questions:', job2Questions);
+    });
+
+    // Retrieve stored solved questions from Chrome storage
+    chrome.storage.local.get('solvedQuestions', data => {
+        if (data && data.solvedQuestions) {
+            const questionsList = document.getElementById('questions-list');
+            data.solvedQuestions.forEach(question => {
+                const listItem = document.createElement('li');
+                listItem.textContent = question;
+                questionsList.appendChild(listItem);
+            });
+        } else {
+            console.log('No solved questions found.');
+        }
+    });
+
+    // Save Job 1 questions
+    document.getElementById('saveJob1').addEventListener('click', function () {
+        job1Questions = document.getElementById('job1Input').value.split('\n').map(question => question.trim());
+        chrome.storage.local.set({ 'job1Questions': job1Questions }, function () {
+            console.log('Job 1 questions saved:', job1Questions);
+        });
+    });
+
+    // Save Job 2 questions
+    document.getElementById('saveJob2').addEventListener('click', function () {
+        job2Questions = document.getElementById('job2Input').value.split('\n').map(question => question.trim());
+        chrome.storage.local.set({ 'job2Questions': job2Questions }, function () {
+            console.log('Job 2 questions saved:', job2Questions);
+        });
+    });
+
     console.log('User completed questions:', userCompletedQuestions);
     document.getElementById('questionText').innerText = 'Job Matching Percentage';
+
+    // Add a question to userCompletedQuestions
+    addQuestion('9. Palindrome Number');
 });
