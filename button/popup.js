@@ -62,16 +62,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Function to add a question to the userCompletedQuestions array
     const addQuestion = (question) => {
-        // Check if the question is not already in the array
-        if (!userCompletedQuestions.includes(question)) {
-            userCompletedQuestions.push(question);
-            // Store the updated array in Chrome storage
-            chrome.storage.local.set({ 'userCompletedQuestions': userCompletedQuestions }, function () {
-                console.log('Question added:', question);
-            });
-        } else {
-            console.log('Question already exists:', question);
-        }
+        // Send message to background script to store question
+        chrome.runtime.sendMessage({ action: 'storeQuestion', question }, function (response) {
+            if (response.success) {
+                userCompletedQuestions = response.questionData;
+                console.log('Updated userCompletedQuestions:', userCompletedQuestions);
+            }
+        });
     };
 
     // Retrieve completed questions from Chrome storage

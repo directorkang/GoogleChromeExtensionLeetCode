@@ -1,4 +1,4 @@
-let questionData = ''; // Global variable to store question data
+let questionData = []; // Global array to store question data
 
 // Listen for the install event
 chrome.runtime.onInstalled.addListener(() => {
@@ -11,26 +11,27 @@ chrome.runtime.onStartup.addListener(() => {
 });
 
 // Listen for messages from other parts of the extension
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'fetchData') {
-        try {
-            const response = await fetch('https://api.example.com/data');
-            const data = await response.json();
-            sendResponse({ success: true, data: data });
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            sendResponse({ success: false, error: error });
-        }
-        return true;
+        fetch('https://api.example.com/data')
+            .then(response => response.json())
+            .then(data => sendResponse({ success: true, data }))
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                sendResponse({ success: false, error });
+            });
+        return true; // Indicates you want to send a response asynchronously
     }
 
     if (message.action === 'storeQuestion') {
-        questionData = message.question;
+        if (!questionData.includes(message.question)) {
+            questionData.push(message.question);
+        }
         console.log('Question stored:', questionData);
-        sendResponse({ success: true });
+        sendResponse({ success: true, questionData });
     }
 
     if (message.action === 'getQuestion') {
-        sendResponse({ success: true, question: questionData });
+        sendResponse({ success: true, questionData });
     }
 });
