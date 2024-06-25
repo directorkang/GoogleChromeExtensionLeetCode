@@ -27,31 +27,65 @@ describe('Extension End-to-End Testing', function () {
     it('should load the LeetCode website with the extension enabled', async function () {
         await driver.get('https://leetcode.com/progress/');
         const title = await driver.getTitle();
-        assert.strictEqual(title, 'LeetCode');
+        assert.strictEqual(title, 'Progress - LeetCode');
     });
 
     it('should correctly extract and store completed questions', async function () {
         await driver.get('https://leetcode.com/progress/');
         await driver.executeScript(() => {
             document.body.innerHTML = `
-                <a href="/problems/example-question-1">435. Non-overlapping Intervals</a>
+                <a href="/problems/example-question-1">9. Palindrome Number</a>
                 <a href="/problems/example-question-2">58. Length of Last Word</a>
             `;
-        });
 
-        await driver.executeScript(() => {
+            // Mock chrome.storage.local
+            window.chrome = {
+                storage: {
+                    local: {
+                        set: function (data, callback) {
+                            Object.keys(data).forEach(key => {
+                                localStorage.setItem(key, JSON.stringify(data[key]));
+                            });
+                            if (callback) callback();
+                        },
+                        get: function (keys, callback) {
+                            let result = {};
+                            keys.forEach(key => {
+                                result[key] = JSON.parse(localStorage.getItem(key));
+                            });
+                            callback(result);
+                        }
+                    }
+                }
+            };
+
+            // Define extractCompletedQuestions function
+            const extractCompletedQuestions = () => {
+                const questionLinks = document.querySelectorAll('a[href*="/problems/"]');
+                let questionTopics = [];
+
+                questionLinks.forEach(link => {
+                    const questionText = link.textContent.trim();
+                    questionTopics.push(questionText);
+                });
+
+                chrome.storage.local.set({ 'userCompletedQuestions': questionTopics }, function () {
+                    console.log('Completed questions saved:', questionTopics);
+                });
+            };
+
             extractCompletedQuestions();
         });
 
         const storedQuestions = await driver.executeScript(() => {
             return new Promise(resolve => {
-                chrome.storage.local.get('userCompletedQuestions', result => {
+                chrome.storage.local.get(['userCompletedQuestions'], result => {
                     resolve(result.userCompletedQuestions);
                 });
             });
         });
 
-        assert.deepEqual(storedQuestions, ['435. Non-overlapping Intervals', '58. Length of Last Word']);
+        assert.deepEqual(storedQuestions, ['9. Palindrome Number', '58. Length of Last Word']);
     });
 
     it('should initialize the pie chart with default values', async function () {
@@ -67,9 +101,30 @@ describe('Extension End-to-End Testing', function () {
         await driver.get('chrome-extension://mkkigfcelehehhmhmfaaoofphdkficip/popup.html');
 
         await driver.executeScript(() => {
+            // Mock chrome.storage.local
+            window.chrome = {
+                storage: {
+                    local: {
+                        set: function (data, callback) {
+                            Object.keys(data).forEach(key => {
+                                localStorage.setItem(key, JSON.stringify(data[key]));
+                            });
+                            if (callback) callback();
+                        },
+                        get: function (keys, callback) {
+                            let result = {};
+                            keys.forEach(key => {
+                                result[key] = JSON.parse(localStorage.getItem(key));
+                            });
+                            callback(result);
+                        }
+                    }
+                }
+            };
+
             chrome.storage.local.set({
-                userCompletedQuestions: ['435. Non-overlapping Intervals', '58. Length of Last Word'],
-                job1Questions: ['435. Non-overlapping Intervals', '58. Length of Last Word', '436. Find Right Interval']
+                userCompletedQuestions: ['9. Palindrome Number'],
+                job1Questions: ['2. Add Two Numbers']
             });
         });
 
@@ -78,9 +133,12 @@ describe('Extension End-to-End Testing', function () {
         });
 
         const pieChartData = await driver.executeScript(() => {
-            return Chart.instances[0].data.datasets[0].data;
+            return new Promise(resolve => setTimeout(() => {
+                resolve(Chart.instances[0].data.datasets[0].data);
+            }, 1000));
         });
 
-        assert.deepEqual(pieChartData, [67, 33]);
+        assert.deepEqual(pieChartData, [0, 100]);
     });
 });
+

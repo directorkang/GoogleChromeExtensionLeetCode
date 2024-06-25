@@ -28,12 +28,15 @@ To run the automated tests for your extension:
 
 Clone or download the project repository containing your extension and the Selenium testing scripts.
 Navigate to the directory containing the Selenium testing scripts.
+
 Run the following command to execute the tests:
 bash
 Copy code
 node seleniumTesting.js
+
 The tests will launch the Chrome browser, load the specified webpage (e.g., LeetCode), and perform the defined test cases.
 After the tests are completed, the browser will automatically close, and the test results will be displayed in the console.
+
 4. Test Cases
 The automated tests cover the following scenarios:
 
