@@ -54,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function () {
     radioButtons.forEach(button => {
         button.addEventListener('change', function () {
             chrome.storage.local.get(['userCompletedQuestions', 'job1Questions', 'job2Questions'], function (result) {
-
                 const userCompletedQuestions = result.userCompletedQuestions || [];
                 let requiredQuestions = [];
 
@@ -74,8 +73,48 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // Function to observe DOM changes
+    const observeDOMChanges = () => {
+        const targetNode = document.querySelector('#content'); // Adjust selector to the container where changes happen
+        const config = { childList: true, subtree: true };
+
+        const callback = (mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    extractCompletedQuestions();
+                    break;
+                }
+            }
+        };
+
+        const observer = new MutationObserver(callback);
+        if (targetNode) {
+            observer.observe(targetNode, config);
+        }
+    };
+
+    // Function to add click event listeners to pagination buttons
+    const addPaginationEventListeners = () => {
+        const paginationButtons = document.querySelectorAll('.flex.items-center.justify-center.px-3.h-8.rounded.select-none.focus\\:outline-none');
+        const svgButtons = document.querySelectorAll('svg');
+
+        paginationButtons.forEach(button => {
+            button.addEventListener('click', extractCompletedQuestions);
+        });
+
+        svgButtons.forEach(svg => {
+            svg.addEventListener('click', extractCompletedQuestions);
+        });
+    };
+
     // Extract and store completed questions when the content script is loaded
     extractCompletedQuestions();
+
+    // Observe DOM changes to re-extract completed questions
+    observeDOMChanges();
+
+    // Add event listeners to pagination buttons
+    addPaginationEventListeners();
 
     // Example of extracting a specific question title if needed
     let questionText = document.querySelector('.question-title')?.innerText;
