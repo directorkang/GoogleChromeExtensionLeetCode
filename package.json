@@ -1,0 +1,19 @@
+{
+  "name": "Leetcode Chrome Extension",
+  "version": "1.0.0",
+  "description": "to generate matching piechart on Leetcode website",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha \"D:/NUS/year 4/FYP/New fyp/Project Repos/button/seleniumTesting.js\""
+  },
+  "dependencies": {
+    "assert": "^2.0.0",
+    "selenium-webdriver": "^4.0.0-alpha.7"
+  },
+  "devDependencies": {
+    "mocha": "^9.0.0",
+    "chromedriver": "^126.0.4"
+  },
+  "author": "Lum Wen Kang",
+  "license": "ISC"
+}
