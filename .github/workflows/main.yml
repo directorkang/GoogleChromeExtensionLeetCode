@@ -22,16 +22,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          path: '././button' 
+          path: './GoogleChromeExtensionLeetCode/button'  # Adjusted path to match your repository structure
           fetch-depth: 0  # Ensure full history is fetched
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '20'
+          node-version: '20'  # Adjusted to a valid Node.js version
 
       - name: Install dependencies
-        working-directory: ././button
+        working-directory: ./GoogleChromeExtensionLeetCode/button  # Adjusted working directory path
         run: npm install
 
       - name: Run Selenium tests
