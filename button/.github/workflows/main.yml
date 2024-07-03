@@ -22,7 +22,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          path: './GoogleChromeExtensionLeetCode/button'  # Adjusted path to match your repository structure
+          path: './GoogleChromeExtensionLeetCode  # Adjusted path to match your repository structure
           fetch-depth: 0  # Ensure full history is fetched
 
       - name: Set up Node.js
