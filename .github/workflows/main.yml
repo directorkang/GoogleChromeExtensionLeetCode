@@ -28,7 +28,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '20'  # Adjusted to a valid Node.js version
+          node-version: '20'  # Updated to Node.js version 20 as per GitHub's deprecation notice
 
       - name: Install dependencies
         working-directory: ./GoogleChromeExtensionLeetCode/button  # Adjusted working directory path
