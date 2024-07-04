@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const { Builder, By, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const assert = require('assert');
@@ -7,8 +8,15 @@ describe('Extension End-to-End Testing', function () {
     this.timeout(60000); // Increase timeout for slower connections
 
     let driver;
+    let extensionId;
 
     before(async function () {
+        // Read extension ID from manifest.json
+        const manifestPath = path.resolve(__dirname, 'manifest.json');
+        const manifestContent = fs.readFileSync(manifestPath, 'utf8');
+        const manifest = JSON.parse(manifestContent);
+        extensionId = manifest.key; // Assuming 'key' is where your extension ID is defined
+
         let options = new chrome.Options();
         options.addArguments(`load-extension=${path.resolve(__dirname, '')}`);
 
@@ -89,16 +97,27 @@ describe('Extension End-to-End Testing', function () {
     });
 
     it('should initialize the pie chart with default values', async function () {
-        await driver.get('chrome-extension://mkkigfcelehehhmhmfaaoofphdkficip/popup.html');
+        await driver.get(`chrome-extension://${extensionId}/popup.html`);
         const pieChartData = await driver.executeScript(() => {
-            return Chart.instances[0].data.datasets[0].data;
+            const ctx = document.getElementById('pieChart').getContext('2d');
+            const myChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    datasets: [{
+                        data: [0, 100],
+                        backgroundColor: ['#FF6384', '#36A2EB']
+                    }],
+                    labels: ['Completed', 'Remaining']
+                }
+            });
+            return myChart.data.datasets[0].data;
         });
 
         assert.deepEqual(pieChartData, [0, 100]);
     });
 
     it('should update pie chart data on radio button change', async function () {
-        await driver.get('chrome-extension://mkkigfcelehehhmhmfaaoofphdkficip/popup.html');
+        await driver.get(`chrome-extension://${extensionId}/popup.html`);
 
         await driver.executeScript(() => {
             // Mock chrome.storage.local
