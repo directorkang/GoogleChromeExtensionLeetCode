@@ -1,0 +1,24 @@
+//this is the login page
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form action="login.php" method="post">
+            <label for="userType">Select User Type:</label>
+            <select name="userType" id="userType">
+                <option value="employee">Employee</option>
+                <option value="employer">Employer</option>
+            </select>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+</body>
+</html>
