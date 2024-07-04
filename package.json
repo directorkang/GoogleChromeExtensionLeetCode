@@ -4,7 +4,7 @@
   "description": "to generate matching piechart on Leetcode website",
   "main": "index.js",
   "scripts": {
-    "test": "mocha \"D:/NUS/year 4/FYP/New fyp/Project Repos/button/seleniumTesting.js\""
+    "test": "mocha \"D:/NUS/year 4/FYP/New fyp/Project Repos/seleniumTesting.js\""
   },
   "dependencies": {
     "assert": "^2.0.0",

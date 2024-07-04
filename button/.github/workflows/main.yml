@@ -22,7 +22,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          path: './GoogleChromeExtensionLeetCode'  # Adjusted path to match your repository structure
+          path: './GoogleChromeExtensionLeetCode'
           fetch-depth: 0  # Ensure full history is fetched
 
       - name: Set up Node.js
@@ -31,7 +31,7 @@ jobs:
           node-version: '20'  # Updated to Node.js version 20 as per GitHub's deprecation notice
 
       - name: Install dependencies
-        working-directory: ./GoogleChromeExtensionLeetCode/button  # Adjusted working directory path
+        working-directory: ./GoogleChromeExtensionLeetCode/
         run: npm install
 
       - name: Run Selenium tests
