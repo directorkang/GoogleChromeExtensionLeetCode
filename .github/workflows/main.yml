@@ -33,9 +33,19 @@ jobs:
         working-directory: ./button
         run: npm install
 
+      - name: Install necessary dependencies for Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+
       - name: Run Selenium tests
         working-directory: ./button
         run: |
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
-          npm run test
+          export DISPLAY=:99.0
+          sudo Xvfb :99 -ac &
+          npm test
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+          MOCHA_REPORTER: spec

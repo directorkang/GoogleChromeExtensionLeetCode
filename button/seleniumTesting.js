@@ -10,7 +10,8 @@ describe('Extension End-to-End Testing', function () {
 
     before(async function () {
         let options = new chrome.Options();
-        options.addArguments(`load-extension=${path.resolve('D:/NUS/year 4/FYP/New fyp/Project Repos/button')}`);
+        // Use a relative path
+        options.addArguments(`load-extension=${path.resolve(__dirname, 'button')}`);
 
         driver = new Builder()
             .forBrowser('chrome')
@@ -141,4 +142,3 @@ describe('Extension End-to-End Testing', function () {
         assert.deepEqual(pieChartData, [0, 100]);
     });
 });
-
