@@ -10,8 +10,7 @@ describe('Extension End-to-End Testing', function () {
 
     before(async function () {
         let options = new chrome.Options();
-        // Use a relative path
-        options.addArguments(`load-extension=${path.resolve(__dirname, 'button')}`);
+        options.addArguments(`load-extension=${path.resolve(__dirname, '')}`);
 
         driver = new Builder()
             .forBrowser('chrome')
