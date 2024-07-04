@@ -19,8 +19,10 @@ describe('Extension End-to-End Testing', function () {
 
         let options = new chrome.Options();
         options.addArguments(`load-extension=${path.resolve(__dirname, '')}`);
+        options.addArguments('--disable-extensions'); // Disable extensions
+        // options.addArguments('--disable-web-security'); // Uncomment only for testing, not recommended for production
 
-        driver = new Builder()
+        driver = await new Builder()
             .forBrowser('chrome')
             .setChromeOptions(options)
             .build();
@@ -98,6 +100,10 @@ describe('Extension End-to-End Testing', function () {
 
     it('should initialize the pie chart with default values', async function () {
         await driver.get(`chrome-extension://${extensionId}/popup.html`);
+
+        // Wait until the canvas element is present and can be interacted with
+        await driver.wait(until.elementLocated(By.id('pieChart')), 10000);
+
         const pieChartData = await driver.executeScript(() => {
             const ctx = document.getElementById('pieChart').getContext('2d');
             const myChart = new Chart(ctx, {
@@ -119,31 +125,26 @@ describe('Extension End-to-End Testing', function () {
     it('should update pie chart data on radio button change', async function () {
         await driver.get(`chrome-extension://${extensionId}/popup.html`);
 
+        // Mocking localStorage
         await driver.executeScript(() => {
-            // Mock chrome.storage.local
-            window.chrome = {
-                storage: {
-                    local: {
-                        set: function (data, callback) {
-                            Object.keys(data).forEach(key => {
-                                localStorage.setItem(key, JSON.stringify(data[key]));
-                            });
-                            if (callback) callback();
-                        },
-                        get: function (keys, callback) {
-                            let result = {};
-                            keys.forEach(key => {
-                                result[key] = JSON.parse(localStorage.getItem(key));
-                            });
-                            callback(result);
-                        }
-                    }
-                }
-            };
-
-            chrome.storage.local.set({
+            const mockLocalStorage = {
                 userCompletedQuestions: ['9. Palindrome Number'],
                 job1Questions: ['2. Add Two Numbers']
+            };
+            Object.defineProperty(window, 'localStorage', {
+                value: {
+                    getItem: function (key) {
+                        return mockLocalStorage[key];
+                    },
+                    setItem: function (key, value) {
+                        mockLocalStorage[key] = value;
+                    },
+                    removeItem: function (key) {
+                        delete mockLocalStorage[key];
+                    }
+                },
+                configurable: true,
+                writable: true
             });
         });
 
@@ -152,9 +153,11 @@ describe('Extension End-to-End Testing', function () {
         });
 
         const pieChartData = await driver.executeScript(() => {
-            return new Promise(resolve => setTimeout(() => {
-                resolve(Chart.instances[0].data.datasets[0].data);
-            }, 1000));
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    resolve(Chart.instances[0].data.datasets[0].data);
+                }, 1000); // Adjust timing as needed
+            });
         });
 
         assert.deepEqual(pieChartData, [0, 100]);
