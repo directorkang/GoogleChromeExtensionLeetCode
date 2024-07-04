@@ -22,19 +22,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          path: './GoogleChromeExtensionLeetCode'  # Adjusted path to match your repository structure
           fetch-depth: 0  # Ensure full history is fetched
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '20'  # Updated to Node.js version 20 as per GitHub's deprecation notice
+          node-version: '20'
 
       - name: Install dependencies
-        working-directory: ./GoogleChromeExtensionLeetCode/button  # Adjusted working directory path
+        working-directory: ./button
         run: npm install
 
       - name: Run Selenium tests
+        working-directory: ./button
         run: |
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
